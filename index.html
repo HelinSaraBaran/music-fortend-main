@@ -72,7 +72,6 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(157, 78, 221, 0.25);
 }
 
-/* ALL BUTTONS PURPLE */
 .btn,
 .btn-primary,
 .btn-success,
@@ -98,7 +97,8 @@ body {
     color: white !important;
 }
 
-.card-body input {
+.card-body input,
+.card-body select {
     margin-bottom: 10px;
 }
 
@@ -152,27 +152,52 @@ body {
         <button v-on:click="logout" class="btn btn-danger">Logout</button>
     </div>
 
-    <!-- GET ALL -->
+    <!-- BROWSE + SEARCH + FILTER -->
     <div class="card section-card">
-        <div class="card-header">Browse Records</div>
+        <div class="card-header">Browse, Search and Filter Records</div>
 
         <div class="card-body">
             <button v-on:click="getAllRecords" class="btn btn-primary mb-3">Get all records</button>
 
-            <input v-model="artistToGetBy"
-                   placeholder="Search by artist"
-                   class="form-control"
-                   v-on:keyup.enter="getByArtist(artistToGetBy)">
+            <div class="row">
+                <div class="col-md-3">
+                    <input v-model="searchTitle"
+                           placeholder="Search by title"
+                           class="form-control">
+                </div>
 
-            <button v-on:click="getByArtist(artistToGetBy)"
-                    class="btn btn-outline-primary mt-2"
-                    :disabled="!artistToGetBy">
-                Search
-            </button>
+                <div class="col-md-3">
+                    <input v-model.number="searchYear"
+                           type="number"
+                           placeholder="Search by year"
+                           class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <input v-model.number="searchDuration"
+                           type="number"
+                           placeholder="Search by duration"
+                           class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <select v-model="sortOrder" class="form-control">
+                        <option value="">No sorting</option>
+                        <option value="newest">Newest year first</option>
+                        <option value="oldest">Oldest year first</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <button v-on:click="clearFilters" class="btn btn-outline-primary">
+                    Clear filters
+                </button>
+            </div>
 
             <div class="mt-4">
-                <div v-if="records.length">
-                    <div v-for="record in records" :key="record.id" class="record-item">
+                <div v-if="filteredRecords.length">
+                    <div v-for="record in filteredRecords" :key="record.id" class="record-item">
                         <strong>ID:</strong> {{ record.id }} <br>
                         <strong>Title:</strong> {{ record.title }} <br>
                         <strong>Artist:</strong> {{ record.artist }} <br>
@@ -200,7 +225,15 @@ body {
             </button>
 
             <div v-if="singleRecord" class="alert alert-info mt-3">
-                {{ singleRecord.title }}
+                <strong>ID:</strong> {{ singleRecord.id }} <br>
+                <strong>Title:</strong> {{ singleRecord.title }} <br>
+                <strong>Artist:</strong> {{ singleRecord.artist }} <br>
+                <strong>Duration:</strong> {{ singleRecord.duration }} sec <br>
+                <strong>Year:</strong> {{ singleRecord.publicationYear }}
+            </div>
+
+            <div v-else-if="idToGetBy" class="alert alert-warning mt-3">
+                No record found
             </div>
         </div>
     </div>

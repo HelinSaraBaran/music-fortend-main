@@ -31,7 +31,6 @@ Vue.createApp({
             },
             updateMessage: "",
 
-            // Login data
             loginData: {
                 username: "",
                 password: ""
@@ -39,12 +38,55 @@ Vue.createApp({
 
             loginMessage: "",
             token: null,
-            isLoggedIn: false
+            isLoggedIn: false,
+
+            searchTitle: "",
+            searchYear: null,
+            searchDuration: null,
+            sortOrder: ""
         };
     },
 
+    computed: {
+        filteredRecords() {
+            let result = this.records.slice();
+
+            if (this.searchTitle && this.searchTitle.trim() !== "") {
+                result = result.filter(
+                    record =>
+                        record.title &&
+                        record.title.toLowerCase().includes(this.searchTitle.toLowerCase())
+                );
+            }
+
+            if (this.searchYear !== null && this.searchYear !== "") {
+                result = result.filter(
+                    record => record.publicationYear == this.searchYear
+                );
+            }
+
+            if (this.searchDuration !== null && this.searchDuration !== "") {
+                result = result.filter(
+                    record => record.duration == this.searchDuration
+                );
+            }
+
+            if (this.sortOrder === "newest") {
+                result.sort(function (firstRecord, secondRecord) {
+                    return secondRecord.publicationYear - firstRecord.publicationYear;
+                });
+            }
+            else if (this.sortOrder === "oldest") {
+                result.sort(function (firstRecord, secondRecord) {
+                    return firstRecord.publicationYear - secondRecord.publicationYear;
+                });
+            }
+
+            return result;
+        }
+    },
+
     mounted() {
-        // Checks if token already exists in localStorage
         const savedToken = localStorage.getItem("token");
 
         if (savedToken) {
@@ -54,6 +96,12 @@ Vue.createApp({
     },
 
     methods: {
+        clearFilters() {
+            this.searchTitle = "";
+            this.searchYear = null;
+            this.searchDuration = null;
+            this.sortOrder = "";
+        },
 
         // ================= LOGIN =================
         async login() {
@@ -224,5 +272,4 @@ Vue.createApp({
             }
         }
     }
-
 }).mount("#app");

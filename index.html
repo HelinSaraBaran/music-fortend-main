@@ -1,184 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Music Records</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Records</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<style>
+body {
+    background: linear-gradient(135deg, #fff0f6, #ffe3ec);
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+.main-title {
+    font-weight: bold;
+    color: #d63384;
+}
+
+.section-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 14px rgba(214, 51, 132, 0.15);
+    margin-bottom: 25px;
+}
+
+.section-card .card-header,
+.login-card .card-header {
+    background: linear-gradient(90deg, #ff66b2, #ff99cc);
+    color: white;
+    font-weight: bold;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.login-card {
+    max-width: 500px;
+    margin: 50px auto;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 14px rgba(214, 51, 132, 0.15);
+}
+
+.record-item {
+    background-color: #fff5fa;
+    border: 1px solid #ffc2d1;
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #ffc2d1;
+}
+
+.form-control:focus {
+    border-color: #9d4edd;
+    box-shadow: 0 0 0 0.2rem rgba(157, 78, 221, 0.25);
+}
+
+/* ALL BUTTONS PURPLE */
+.btn,
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-outline-primary {
+    background-color: #9d4edd !important;
+    border-color: #9d4edd !important;
+    color: white !important;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-success:hover,
+.btn-warning:hover,
+.btn-danger:hover,
+.btn-outline-primary:hover {
+    background-color: #7b2cbf !important;
+    border-color: #7b2cbf !important;
+    color: white !important;
+}
+
+.card-body input {
+    margin-bottom: 10px;
+}
+
+.alert-info {
+    background-color: #ffe3ec;
+    border-color: #ffc2d1;
+    color: #8a235d;
+}
+
+.alert-warning {
+    background-color: #fff0f6;
+    border-color: #ffb3d9;
+    color: #a61e64;
+}
+
+.alert-secondary {
+    background-color: #fff5fa;
+    border-color: #ffd6e8;
+    color: #a61e64;
+}
+</style>
 </head>
 
 <body>
-    <div class="container mt-4">
-        <h1>Music Records</h1>
+<div class="container py-5">
+<div id="app">
 
-        <div id="app">
+<!-- LOGIN -->
+<div v-if="!isLoggedIn">
+    <div class="card login-card">
+        <div class="card-header text-center">
+            <h3 class="mb-0">🎵 Login</h3>
+        </div>
 
-            <!-- LOGIN -->
-            <div v-if="!isLoggedIn">
-                <h2>Login</h2>
+        <div class="card-body p-4">
+            <input v-model="loginData.username" placeholder="Username" class="form-control mb-3">
+            <input v-model="loginData.password" type="password" placeholder="Password" class="form-control mb-3">
 
-                <input v-model="loginData.username"
-                       placeholder="username"
-                       class="form-control mb-2" />
+            <button v-on:click="login" class="btn btn-primary btn-block">Login</button>
 
-                <input v-model="loginData.password"
-                       type="password"
-                       placeholder="password"
-                       class="form-control mb-2" />
+            <div class="text-danger mt-3 text-center">{{ loginMessage }}</div>
+        </div>
+    </div>
+</div>
 
-                <button v-on:click="login" class="btn btn-primary">
-                    Login
-                </button>
+<!-- APP -->
+<div v-else>
 
-                <div class="mt-2">{{ loginMessage }}</div>
-            </div>
+    <div class="top-bar">
+        <h1 class="main-title">🎵 Music Records</h1>
+        <button v-on:click="logout" class="btn btn-danger">Logout</button>
+    </div>
 
-            <!-- APP -->
-            <div v-else>
-                <button v-on:click="logout" class="btn btn-danger mb-3">
-                    Logout
-                </button>
+    <!-- GET ALL -->
+    <div class="card section-card">
+        <div class="card-header">Browse Records</div>
 
-                <hr />
+        <div class="card-body">
+            <button v-on:click="getAllRecords" class="btn btn-primary mb-3">Get all records</button>
 
-                <!-- GET ALL -->
-                <h2>Get All (GET)</h2>
-                <button v-on:click="getAllRecords" class="btn btn-primary">
-                    Get all records
-                </button>
+            <input v-model="artistToGetBy"
+                   placeholder="Search by artist"
+                   class="form-control"
+                   v-on:keyup.enter="getByArtist(artistToGetBy)">
 
-                <br /><br />
+            <button v-on:click="getByArtist(artistToGetBy)"
+                    class="btn btn-outline-primary mt-2"
+                    :disabled="!artistToGetBy">
+                Search
+            </button>
 
-                <!-- GET BY ARTIST -->
-                <input v-model="artistToGetBy"
-                       placeholder="artist"
-                       class="form-control mb-2"
-                       v-on:keyup.enter="getByArtist(artistToGetBy)" />
-
-                <button v-on:click="getByArtist(artistToGetBy)"
-                        class="btn btn-primary"
-                        :disabled="!artistToGetBy">
-                    Get by artist
-                </button>
-
-                <ul v-if="records.length" class="mt-3">
-                    <li v-for="record in records" :key="record.id">
-                        {{ record.id }} {{ record.artist }} :
-                        {{ record.title }} ({{ record.duration }} sec)
-                    </li>
-                </ul>
-
-                <div v-else-if="hasSearched" class="mt-3">No records</div>
-
-                <hr />
-
-                <!-- GET BY ID -->
-                <h2>Get by ID</h2>
-                <input v-model.number="idToGetBy"
-                       type="number"
-                       placeholder="Enter ID"
-                       class="form-control mb-2" />
-
-                <button v-on:click="getById(idToGetBy)" class="btn btn-primary">
-                    Get
-                </button>
-
-                <div v-if="singleRecord" class="mt-3">
-                    {{ singleRecord.id }} {{ singleRecord.title }} {{ singleRecord.artist }}
+            <div class="mt-4">
+                <div v-if="records.length">
+                    <div v-for="record in records" :key="record.id" class="record-item">
+                        <strong>ID:</strong> {{ record.id }} <br>
+                        <strong>Title:</strong> {{ record.title }} <br>
+                        <strong>Artist:</strong> {{ record.artist }} <br>
+                        <strong>Duration:</strong> {{ record.duration }} sec <br>
+                        <strong>Year:</strong> {{ record.publicationYear }}
+                    </div>
                 </div>
 
-                <div v-else-if="idToGetBy" class="mt-3">
-                    No record found
+                <div v-else-if="hasSearched" class="alert alert-secondary">
+                    No records found
                 </div>
-
-                <hr />
-
-                <!-- DELETE -->
-                <h2>Delete</h2>
-                <input v-model.number="deleteId"
-                       type="number"
-                       placeholder="Enter ID"
-                       class="form-control mb-2" />
-
-                <button v-on:click="deleteRecord(deleteId)"
-                        class="btn btn-warning"
-                        :disabled="!deleteId">
-                    Delete
-                </button>
-
-                <div class="mt-2">{{ deleteMessage }}</div>
-
-                <hr />
-
-                <!-- ADD -->
-                <h2>Add</h2>
-                <input v-model="addData.title"
-                       placeholder="title"
-                       class="form-control mb-2" />
-
-                <input v-model="addData.artist"
-                       placeholder="artist"
-                       class="form-control mb-2" />
-
-                <input v-model.number="addData.duration"
-                       placeholder="duration"
-                       type="number"
-                       class="form-control mb-2" />
-
-                <input v-model.number="addData.publicationYear"
-                       placeholder="year"
-                       type="number"
-                       class="form-control mb-2" />
-
-                <button v-on:click="addRecord()"
-                        class="btn btn-success"
-                        :disabled="!addData.title || !addData.artist">
-                    Add
-                </button>
-
-                <div class="mt-2">{{ addMessage }}</div>
-
-                <hr />
-
-                <!-- UPDATE -->
-                <h2>Update</h2>
-                <input v-model.number="updateData.id"
-                       placeholder="id"
-                       type="number"
-                       class="form-control mb-2" />
-
-                <input v-model="updateData.title"
-                       placeholder="title"
-                       class="form-control mb-2" />
-
-                <input v-model="updateData.artist"
-                       placeholder="artist"
-                       class="form-control mb-2" />
-
-                <input v-model.number="updateData.duration"
-                       placeholder="duration"
-                       type="number"
-                       class="form-control mb-2" />
-
-                <input v-model.number="updateData.publicationYear"
-                       placeholder="year"
-                       type="number"
-                       class="form-control mb-2" />
-
-                <button v-on:click="updateRecord()"
-                        class="btn btn-success"
-                        :disabled="!updateData.id">
-                    Update
-                </button>
-
-                <div class="mt-2">{{ updateMessage }}</div>
             </div>
         </div>
     </div>
 
-    <script src="index.js"></script>
+    <!-- GET BY ID -->
+    <div class="card section-card">
+        <div class="card-header">Get Record by ID</div>
+
+        <div class="card-body">
+            <input v-model.number="idToGetBy" type="number" placeholder="Enter ID" class="form-control">
+
+            <button v-on:click="getById(idToGetBy)" class="btn btn-primary mt-2">
+                Get
+            </button>
+
+            <div v-if="singleRecord" class="alert alert-info mt-3">
+                {{ singleRecord.title }}
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="card section-card">
+        <div class="card-header">Delete Record</div>
+
+        <div class="card-body">
+            <input v-model.number="deleteId" type="number" placeholder="Enter ID" class="form-control">
+
+            <button v-on:click="deleteRecord(deleteId)"
+                    class="btn btn-warning mt-2"
+                    :disabled="!deleteId">
+                Delete
+            </button>
+
+            <div class="mt-2">{{ deleteMessage }}</div>
+        </div>
+    </div>
+
+    <!-- ADD -->
+    <div class="card section-card">
+        <div class="card-header">Add Record</div>
+
+        <div class="card-body">
+            <input v-model="addData.title" placeholder="Title" class="form-control">
+            <input v-model="addData.artist" placeholder="Artist" class="form-control">
+            <input v-model.number="addData.duration" type="number" placeholder="Duration" class="form-control">
+            <input v-model.number="addData.publicationYear" type="number" placeholder="Year" class="form-control">
+
+            <button v-on:click="addRecord()"
+                    class="btn btn-success mt-2">
+                Add
+            </button>
+
+            <div class="mt-2">{{ addMessage }}</div>
+        </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="card section-card">
+        <div class="card-header">Update Record</div>
+
+        <div class="card-body">
+            <input v-model.number="updateData.id" type="number" placeholder="ID" class="form-control">
+            <input v-model="updateData.title" placeholder="Title" class="form-control">
+            <input v-model="updateData.artist" placeholder="Artist" class="form-control">
+            <input v-model.number="updateData.duration" type="number" placeholder="Duration" class="form-control">
+            <input v-model.number="updateData.publicationYear" type="number" placeholder="Year" class="form-control">
+
+            <button v-on:click="updateRecord()"
+                    class="btn btn-success mt-2">
+                Update
+            </button>
+
+            <div class="mt-2">{{ updateMessage }}</div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+
+<script src="index.js"></script>
 </body>
 </html>
